@@ -1,5 +1,18 @@
 package org.web3j.sample;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.cloudformation.AmazonCloudFormation;
+import com.amazonaws.services.cloudformation.AmazonCloudFormationClientBuilder;
+import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduce;
+import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduceClientBuilder;
+import com.amazonaws.services.inspector.AmazonInspector;
+import com.amazonaws.services.inspector.AmazonInspectorClientBuilder;
+import com.amazonaws.services.servicequotas.AWSServiceQuotas;
+import com.amazonaws.services.servicequotas.AWSServiceQuotasClientBuilder;
+import com.fasterxml.jackson.annotation.JacksonInject;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.annotation.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.Credentials;
@@ -48,6 +61,13 @@ public class Application {
 
     public static void main(String[] args) throws Exception {
         new Application().run();
+
+        BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials("bfvjkhdbvcfdk","bhgujkfdbvci");
+        AmazonElasticMapReduce emrClient = getEMRClient(basicAWSCredentials, "us");
+        AWSServiceQuotas serviceQuotaClient = getServiceQuotaClient(basicAWSCredentials, "us");
+        AmazonCloudFormation amazonCloudFormation = getCloudFormationClient(basicAWSCredentials,"us");
+        AmazonInspector amazonInspector = getInspectorClient(basicAWSCredentials, "us");
+
     }
 
     private void run() throws Exception {
@@ -109,5 +129,38 @@ public class Application {
             log.info("Indexed event previous value: " + Numeric.toHexString(event.oldGreetingIdx)
                     + ", new value: " + Numeric.toHexString(event.newGreetingIdx));
         }
+
+
+    }
+    @JacksonInject
+    public static AmazonElasticMapReduce getEMRClient(BasicAWSCredentials awsCreds, String region){
+        return AmazonElasticMapReduceClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+                .withRegion(region)
+                .build();
+    }
+
+    @AliasFor
+    public static AWSServiceQuotas getServiceQuotaClient(BasicAWSCredentials awsCreds, String region){
+        return AWSServiceQuotasClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+                .withRegion(region)
+                .build();
+    }
+
+    @AliasFor
+    public static AmazonCloudFormation getCloudFormationClient(BasicAWSCredentials awsCreds, String region){
+        return AmazonCloudFormationClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+                .withRegion(region)
+                .build();
+    }
+
+    @Order
+    public static AmazonInspector getInspectorClient(BasicAWSCredentials awsCreds, String region){
+        return AmazonInspectorClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+                .withRegion(region)
+                .build();
     }
 }
